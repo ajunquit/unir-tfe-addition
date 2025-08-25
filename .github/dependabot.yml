@@ -8,7 +8,9 @@ registries:
 
 updates:
   - package-ecosystem: nuget
-    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"
+    directories:
+      - "/src/**"
+      - "/test/**"
     registries: ["github"]
     schedule:
       interval: daily
