@@ -48,6 +48,9 @@ jobs:
           fi
           dotnet nuget list source
 
+      - name: Auth for GitHub Packages
+        run: echo "NUGET_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
       - name: Restore
         run: |
           dotnet restore $PROJECT_PATH
