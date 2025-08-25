@@ -1,21 +1,16 @@
+# .github/dependabot.yml
 version: 2
 
 registries:
-  github:
+  gh:
     type: nuget-feed
     url: https://nuget.pkg.github.com/ajunquit/index.json
     username: ajunquit
-    password: ${{secrets.GH_PACKAGES_TOKEN}}
+    password: ${{secrets.GH_PACKAGES_TOKEN}}  # token con read:packages
 
 updates:
   - package-ecosystem: "nuget"
-    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"  # carpeta que contiene el .csproj
-    registries: ["github"]
+    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"
     schedule:
       interval: "daily"
-    # usa el ID EXACTO del PackageReference del .csproj; si no estás seguro, comenta este bloque:
-    #allow:
-    #  - dependency-name: "UNIR.TFE.Polyrepo.Shared"
-    open-pull-requests-limit: 5
-    labels: ["dependencies", "nuget"]
-    target-branch: "main"
+    registries: ["gh"]
