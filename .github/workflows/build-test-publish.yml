@@ -58,9 +58,10 @@ jobs:
 
       - name: Test (unit tests + coverage)
         run: |
-          dotnet test $TEST_PATH -c Release --no-build \
+          dotnet test $TEST_PATH -c Release \
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results \
+            --collect:"XPlat Code Coverage"
 
       - name: Upload test results
         if: always()
