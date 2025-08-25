@@ -20,8 +20,9 @@ updates:
       - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     schedule:
       interval: "daily"
-      time: "18:35"
+      time: "09:00"
       timezone: "America/Guayaquil"
     open-pull-requests-limit: 5
     target-branch: "main"
     labels: ["dependencies", "nuget"]
+#fire
