@@ -4,7 +4,7 @@ version: 2
 registries:
   gh:
     type: nuget-feed
-    url: https://nuget.pkg.github.com/<OWNER>/index.json
+    url: https://nuget.pkg.github.com/ajunquit/index.json
     username: ajunquit
     password: ${{secrets.GH_PACKAGES_TOKEN}}  # token con read:packages
 
