@@ -1,21 +1,9 @@
 version: 2
 
-registries:
-  github:
-    type: nuget-feed
-    url: https://nuget.pkg.github.com/ajunquit/index.json
-    username: ajunquit
-    password: ${{secrets.GH_PACKAGES_TOKEN}}
-
 updates:
   - package-ecosystem: "nuget"
-    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"  # carpeta que contiene el .csproj
-    registries: ["github"]
+    directory: "/"  # carpeta que contiene el .csproj
     schedule:
       interval: "daily"
-    # usa el ID EXACTO del PackageReference del .csproj; si no estás seguro, comenta este bloque:
-    #allow:
-    #  - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     open-pull-requests-limit: 5
     labels: ["dependencies", "nuget"]
-    target-branch: "main"
