@@ -9,13 +9,13 @@ registries:
 
 updates:
   - package-ecosystem: "nuget"
-    directory: "/"                # cambia si tu .csproj vive en /src u otra carpeta
+    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"  # carpeta que contiene el .csproj
     registries: ["github"]
     schedule:
       interval: "daily"
-    allow:
-      - dependency-name: "unir.tfe.polyrepo.shared"
+    # usa el ID EXACTO del PackageReference del .csproj; si no estás seguro, comenta este bloque:
+    #allow:
+    #  - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     open-pull-requests-limit: 5
     labels: ["dependencies", "nuget"]
     target-branch: "main"
-
