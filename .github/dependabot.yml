@@ -20,7 +20,7 @@ updates:
       - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     schedule:
       interval: "daily"
-      time: "09:00"
+      time: "18:35"
       timezone: "America/Guayaquil"
     open-pull-requests-limit: 5
     target-branch: "main"
