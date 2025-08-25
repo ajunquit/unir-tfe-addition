@@ -14,8 +14,8 @@ updates:
     schedule:
       interval: "daily"
     # usa el ID EXACTO del PackageReference del .csproj; si no estás seguro, comenta este bloque:
-    allow:
-      - dependency-name: "UNIR.TFE.Polyrepo.Shared"
+    #allow:
+    #  - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     open-pull-requests-limit: 5
     labels: ["dependencies", "nuget"]
     target-branch: "main"
