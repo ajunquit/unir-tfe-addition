@@ -9,7 +9,7 @@ registries:
 
 updates:
   - package-ecosystem: "nuget"
-    directory: "/"                # cambia si tu .csproj vive en /src u otra carpeta
+    directory: "/src"                # cambia si tu .csproj vive en /src u otra carpeta
     registries: ["github"]
     schedule:
       interval: "daily"
