@@ -1,5 +1,4 @@
 version: 2
-
 registries:
   github:
     type: nuget-feed
@@ -8,14 +7,11 @@ registries:
     password: ${{secrets.GH_PACKAGES_TOKEN}}
 
 updates:
-  - package-ecosystem: "nuget"
-    directory: "/src"                # cambia si tu .csproj vive en /src u otra carpeta
+  - package-ecosystem: nuget
+    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"
     registries: ["github"]
     schedule:
-      interval: "daily"
+      interval: daily
     allow:
-      - dependency-name: "unir.tfe.polyrepo.shared"
-    open-pull-requests-limit: 5
-    labels: ["dependencies", "nuget"]
-    target-branch: "main"
-
+      - dependency-name: "UNIR.TFE.Polyrepo.Shared"   # usa el mismo nombre que en tu .csproj
+    target-branch: main
