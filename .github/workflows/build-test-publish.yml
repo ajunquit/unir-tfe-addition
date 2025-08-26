@@ -21,10 +21,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET + Auth to GH Packages
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          # setup-dotnet usa este token para el feed anterior
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine package version
         id: ver
@@ -85,3 +89,5 @@ jobs:
 
       - name: Publish to GitHub Packages
         run: dotnet nuget push "./artifacts/*.nupkg" --source "github" --skip-duplicate
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
