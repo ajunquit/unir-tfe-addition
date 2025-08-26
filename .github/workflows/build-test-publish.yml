@@ -1,22 +1,21 @@
-name: build-and-test
-
+name: publish-nuget
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main]     # Auto-versionado en CI
+    tags: ['v*']         # Releases estables por tag (v1.2.3)
+  workflow_dispatch: # Para lanzar manualmente
 
 permissions:
   contents: read
-  packages: read   # solo necesitamos leer paquetes para restore
+  packages: write   # necesario para publicar a GitHub Packages
 
 env:
   PROJECT_PATH: src/UNIR.TFE.Polyrepo.Addition.Module/UNIR.TFE.Polyrepo.Addition.Module.csproj
   TEST_PATH: test/UNIR.TFE.Polyrepo.Addition.Module.Test/UNIR.TFE.Polyrepo.Addition.Module.Test.csproj
+  BASE_VERSION: "0.0"
 
 jobs:
-  build_test:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,37 +26,28 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      # Fuente NuGet de GitHub (idempotente)
-      - name: Configure GitHub Packages source
+      - name: Determine package version
+        id: ver
         shell: bash
         run: |
-          SRC_NAME="github-ajunquit"
-          SRC_URL="https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          if dotnet nuget list source | grep -q "$SRC_NAME"; then
-            dotnet nuget update source "$SRC_NAME" \
-              --username ${{ github.actor }} \
-              --password ${{ secrets.GITHUB_TOKEN }} \
-              --store-password-in-clear-text \
-              --source "$SRC_URL"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            # Caso 1: release estable por tag vX.Y.Z
+            VERSION="${GITHUB_REF_NAME#v}"
+            echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+            echo "RELEASE_KIND=tag" >> $GITHUB_ENV
           else
-            dotnet nuget add source "$SRC_URL" \
-              --name "$SRC_NAME" \
-              --username ${{ github.actor }} \
-              --password ${{ secrets.GITHUB_TOKEN }} \
-              --store-password-in-clear-text
+            # Caso 2: auto-versionado en CI (main)
+            # Resultado: X.Y.<run_number>  (ej. 0.0.57)
+            VERSION="${BASE_VERSION}.${GITHUB_RUN_NUMBER}"
+            echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+            echo "RELEASE_KIND=ci" >> $GITHUB_ENV
           fi
-          dotnet nuget list source
-
-      - name: Auth for GitHub Packages
-        run: echo "NUGET_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          echo "Version => ${VERSION}"
 
       - name: Restore
         run: |
           dotnet restore $PROJECT_PATH
           dotnet restore $TEST_PATH
-
-      - name: Build
-        run: dotnet build $PROJECT_PATH -c Release --no-restore
 
       - name: Test (unit tests + coverage)
         run: |
@@ -75,3 +65,19 @@ jobs:
             ./test-results
             **/TestResults/**/*.trx
             **/TestResults/**/*.xml
+            
+      - name: Pack
+        run: |
+          dotnet pack $PROJECT_PATH -c Release -o ./artifacts \
+            /p:Version=$PACKAGE_VERSION /p:PackageVersion=$PACKAGE_VERSION
+
+      - name: Add GitHub Packages source
+        run: |
+          dotnet nuget add source \
+            --username ${{ github.actor }} \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text \
+            --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+      - name: Publish to GitHub Packages
+        run: dotnet nuget push "./artifacts/*.nupkg" --source "github" --skip-duplicate
