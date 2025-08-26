@@ -6,20 +6,32 @@ registries:
     url: https://nuget.pkg.github.com/ajunquit/index.json
     username: ajunquit
     password: ${{secrets.GH_PACKAGES_TOKEN}}  # secreto de Dependabot
-    # (Para NuGet no existe 'replaces-base') 
 
 updates:
-  - package-ecosystem: "nuget"
-    directories:
-      - "/src/**"
-      - "/test/**"
+  # 1) Proyecto principal
+  - package-ecosystem: nuget
+    directory: "/src/UNIR.TFE.Polyrepo.Addition.Module"
     registries:
       - gh-nuget-ajunquit
-    # Opcional: limítate a tu paquete compartido
     allow:
       - dependency-name: "UNIR.TFE.Polyrepo.Shared"
     schedule:
-      interval: "daily"
+      interval: daily
+      time: "09:00"
+      timezone: "America/Guayaquil"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels: ["dependencies", "nuget"]
+
+  # 2) Tests
+  - package-ecosystem: nuget
+    directory: "/test/UNIR.TFE.Polyrepo.Addition.Module.Test"
+    registries:
+      - gh-nuget-ajunquit
+    allow:
+      - dependency-name: "UNIR.TFE.Polyrepo.Shared"
+    schedule:
+      interval: daily
       time: "09:00"
       timezone: "America/Guayaquil"
     open-pull-requests-limit: 5
