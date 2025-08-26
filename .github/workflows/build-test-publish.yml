@@ -79,15 +79,10 @@ jobs:
           dotnet pack $PROJECT_PATH -c Release -o ./artifacts \
             /p:Version=$PACKAGE_VERSION /p:PackageVersion=$PACKAGE_VERSION
 
-      - name: Add GitHub Packages source
-        run: |
-          dotnet nuget add source \
-            --username ${{ github.actor }} \
-            --password ${{ secrets.GITHUB_TOKEN }} \
-            --store-password-in-clear-text \
-            --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-
       - name: Publish to GitHub Packages
-        run: dotnet nuget push "./artifacts/*.nupkg" --source "github" --skip-duplicate
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --skip-duplicate
