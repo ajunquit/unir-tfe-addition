@@ -46,8 +46,12 @@ jobs:
 
       - name: Restore
         run: |
-          dotnet restore $PROJECT_PATH
-          dotnet restore $TEST_PATH
+          dotnet restore $PROJECT_PATH \
+            --source "https://api.nuget.org/v3/index.json" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          dotnet restore $TEST_PATH \
+            --source "https://api.nuget.org/v3/index.json" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
       - name: Test (unit tests + coverage)
         run: |
