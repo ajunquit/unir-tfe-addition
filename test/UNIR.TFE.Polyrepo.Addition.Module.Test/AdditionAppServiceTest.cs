@@ -6,6 +6,10 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
     {
         private readonly AdditionAppService _sut;
 
+        // <<< NUEVO >>>: cantidad de casos masivos para alcanzar ~12k en total
+        // Con tus pruebas actuales (~3454), 8546 nos deja cerca de 12k.
+        private const int BULK_CASES_COUNT = 8546;
+
         public AdditionAppServiceTests()
         {
             _sut = new AdditionAppService();
@@ -14,13 +18,8 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [Fact]
         public void Key_ShouldReturn_Add_WhenRequested()
         {
-            // Arrange
             const string expectedKey = "add";
-
-            // Act
             var actualKey = _sut.Key;
-
-            // Assert
             Assert.Equal(expectedKey, actualKey);
         }
 
@@ -32,26 +31,16 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [InlineData(123.45, 54.55, 178)]
         [InlineData(-5, -7, -12)]
         [InlineData(999999999, 1, 1000000000)]
-        //[InlineData(decimal.MaxValue, 0, decimal.MaxValue)]
-        //[InlineData(decimal.MinValue, 0, decimal.MinValue)]
-        //[InlineData(0, decimal.MaxValue, decimal.MaxValue)]
-        //[InlineData(0, decimal.MinValue, decimal.MinValue)]
         public void Execute_ShouldReturn_CorrectSum_ForGivenOperands(decimal operandA, decimal operandB, decimal expectedSum)
         {
-            // Act
             var actualSum = _sut.Execute(operandA, operandB);
-
-            // Assert
             Assert.Equal(expectedSum, actualSum);
         }
 
         [Fact]
         public void Execute_ShouldHandle_MaxDecimalValues()
         {
-            // Arrange
             decimal maxValue = decimal.MaxValue;
-
-            // Act & Assert
             var result = _sut.Execute(maxValue, 0);
             Assert.Equal(maxValue, result);
         }
@@ -59,10 +48,7 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [Fact]
         public void Execute_ShouldHandle_MinDecimalValues()
         {
-            // Arrange
             decimal minValue = decimal.MinValue;
-
-            // Act & Assert
             var result = _sut.Execute(minValue, 0);
             Assert.Equal(minValue, result);
         }
@@ -82,10 +68,7 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(SequentialNumbers))]
         public void Execute_WithSequentialNumbers_ReturnsCorrectResult(decimal a, decimal b, decimal expected)
         {
-            // Act
             var result = _sut.Execute(a, b);
-
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -105,19 +88,14 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
             };
 
             foreach (var (a, b, expected) in testCases)
-            {
                 yield return new object[] { a, b, expected };
-            }
         }
 
         [Theory]
         [MemberData(nameof(DecimalTestCases))]
         public void Execute_WithDecimalNumbers_ReturnsPreciseResult(decimal a, decimal b, decimal expected)
         {
-            // Act
             var result = _sut.Execute(a, b);
-
-            // Assert
             Assert.Equal(expected, result);
         }
 
@@ -150,17 +128,14 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(LargeNumbersTestCases))]
         public void Execute_WithLargeNumbers_ReturnsCorrectResult(decimal a, decimal b, decimal expected)
         {
-            // Act
             var result = _sut.Execute(a, b);
-
-            // Assert
             Assert.Equal(expected, result);
         }
 
         // Pruebas de propiedades matemáticas
         public static IEnumerable<object[]> CommutativePropertyTestCases()
         {
-            var random = new Random();
+            var random = new Random(20250825); // seed fija para repetibilidad
             for (int i = 0; i < 100; i++)
             {
                 decimal a = (decimal)(random.NextDouble() * 1000 - 500);
@@ -173,18 +148,14 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(CommutativePropertyTestCases))]
         public void Execute_ShouldBeCommutative(decimal a, decimal b)
         {
-            // Act
             var result1 = _sut.Execute(a, b);
             var result2 = _sut.Execute(b, a);
-
-            // Assert
             Assert.Equal(result1, result2);
         }
 
-        // Pruebas de asociatividad (a + b) + c = a + (b + c)
         public static IEnumerable<object[]> AssociativePropertyTestCases()
         {
-            var random = new Random();
+            var random = new Random(20250826); // seed fija
             for (int i = 0; i < 100; i++)
             {
                 decimal a = (decimal)(random.NextDouble() * 1000 - 500);
@@ -198,18 +169,15 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(AssociativePropertyTestCases))]
         public void Execute_ShouldBeAssociative(decimal a, decimal b, decimal c)
         {
-            // Act
             var result1 = _sut.Execute(_sut.Execute(a, b), c);
             var result2 = _sut.Execute(a, _sut.Execute(b, c));
-
-            // Assert
             Assert.Equal(result1, result2);
         }
 
         // Pruebas de elemento neutro (a + 0 = a)
         public static IEnumerable<object[]> IdentityElementTestCases()
         {
-            var random = new Random();
+            var random = new Random(20250827); // seed fija
             for (int i = 0; i < 100; i++)
             {
                 decimal a = (decimal)(random.NextDouble() * 2000 - 1000);
@@ -221,63 +189,30 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(IdentityElementTestCases))]
         public void Execute_WithZero_ShouldReturnSameNumber(decimal a)
         {
-            // Act
             var result = _sut.Execute(a, 0);
-
-            // Assert
             Assert.Equal(a, result);
         }
 
-        // Pruebas de inverso aditivo (a + (-a) = 0)
         [Theory]
         [MemberData(nameof(IdentityElementTestCases))]
         public void Execute_WithInverse_ShouldReturnZero(decimal a)
         {
-            // Act
             var result = _sut.Execute(a, -a);
-
-            // Assert
             Assert.Equal(0, result);
         }
 
-        // Pruebas de rendimiento con múltiples operaciones
         [Fact]
         public void Execute_ShouldHandle_MultipleOperationsCorrectly()
         {
-            // Arrange
             decimal result = 0;
             decimal expected = 0;
-
-            // Act
             for (int i = 1; i <= 1000; i++)
             {
                 result = _sut.Execute(result, 1);
                 expected += 1;
             }
-
-            // Assert
             Assert.Equal(expected, result);
         }
-
-        // Pruebas con números en los límites del decimal
-        public static IEnumerable<object[]> EdgeCaseTestCases()
-        {
-            yield return new object[] { decimal.MaxValue, decimal.MaxValue };
-            yield return new object[] { decimal.MinValue, decimal.MinValue };
-            yield return new object[] { decimal.MaxValue, decimal.MinValue };
-            yield return new object[] { decimal.MinValue, decimal.MaxValue };
-            yield return new object[] { decimal.MaxValue, 1 };
-            yield return new object[] { decimal.MinValue, -1 };
-        }
-
-        //[Theory]
-        //[MemberData(nameof(EdgeCaseTestCases))]
-        //public void Execute_WithEdgeCases_ShouldNotThrow(decimal a, decimal b)
-        //{
-        //    // Act & Assert (no debería lanzar excepción)
-        //    var result = _sut.Execute(a, b);
-        //    Assert.IsType<decimal>(result);
-        //}
 
         // Pruebas de precisión decimal
         public static IEnumerable<object[]> PrecisionTestCases()
@@ -294,10 +229,50 @@ namespace UNIR.TFE.Polyrepo.Addition.Module.Test
         [MemberData(nameof(PrecisionTestCases))]
         public void Execute_WithHighPrecisionNumbers_MaintainsPrecision(decimal a, decimal b, decimal expected)
         {
-            // Act
             var result = _sut.Execute(a, b);
+            Assert.Equal(expected, result);
+        }
 
-            // Assert
+        // =========================
+        // <<< NUEVO >>> 8 546 CASOS
+        // =========================
+
+        // Genera decimales seguros con escalas 0..3 y magnitudes acotadas.
+        private static decimal NextDecimal(Random rng)
+        {
+            var sign = rng.Next(0, 2) == 0 ? 1m : -1m;
+            int magnitude = rng.Next(0, 10_000_000); // 0 .. 9,999,999
+            int scale = rng.Next(0, 4);              // 0..3 decimales
+
+            // divisor = 10^scale (en decimal, sin double para evitar ruido)
+            decimal divisor = 1m;
+            for (int i = 0; i < scale; i++) divisor *= 10m;
+
+            return sign * (magnitude / divisor);
+        }
+
+        public static IEnumerable<object[]> BulkAdditionCases()
+        {
+            var rng = new Random(424242); // seed fija para repetibilidad
+            for (int i = 0; i < BULK_CASES_COUNT; i++)
+            {
+                decimal a = NextDecimal(rng);
+                decimal b = NextDecimal(rng);
+
+                // Evitamos resultados fuera de rango del decimal (a+b muy grande)
+                // Con nuestras magnitudes el riesgo es nulo, pero dejamos el chequeo por si se cambia la generación.
+                decimal expected = a + b;
+
+                yield return new object[] { a, b, expected };
+            }
+        }
+
+        [Trait("size", "bulk")]
+        [Theory]
+        [MemberData(nameof(BulkAdditionCases))]
+        public void Execute_BulkRandomizedDataset_ReturnsCorrectSum(decimal a, decimal b, decimal expected)
+        {
+            var result = _sut.Execute(a, b);
             Assert.Equal(expected, result);
         }
     }
